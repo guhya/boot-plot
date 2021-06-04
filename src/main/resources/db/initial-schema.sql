@@ -1,0 +1,6 @@
+CREATE TABLE tbScooter (
+  seq integer NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+  lat decimal(10,6) DEFAULT NULL,
+  lon decimal(10,6) DEFAULT NULL,
+  PRIMARY KEY (seq)
+); 

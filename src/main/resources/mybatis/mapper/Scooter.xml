@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.guhya.boot.plot.module.scooter.dao.Mapper">
+
+	<resultMap id="scooterResultMap" type="net.guhya.boot.plot.module.scooter.data.ScooterData">
+		<id property="seq" 			column="seq"/>
+		<result property="lat" 		column="lat"/>
+		<result property="lon" 		column="lon"/>
+	</resultMap>
+
+	<sql id="listWhere">	
+       	WHERE 1=1
+       	<if test="condition != null and keyword != null">
+       		<if test="condition == 'seq'">
+       			AND a.seq LIKE '%' || #{seq} || '%'
+       		</if>
+       		<if test="condition == 'lat'">
+       			AND a.lat LIKE '%' || #{lat} || '%'
+       		</if>        		
+       		<if test="condition == 'lon'">
+       			AND a.lon LIKE '%' || #{lon} || '%'
+       		</if>        		
+       		<if test="condition == 'all'">
+       			AND a.lat LIKE '%1'
+       			<!-- 
+       			AND (
+      					a.seq LIKE '%' || #{seq} || '%'
+      				)
+      				-->
+       		</if>        		
+       	</if>
+	</sql>
+	
+	<sql id="listOrder">
+		ORDER BY	
+       	<if test="sortColumn != null and sortColumn != ''">
+       		<if test="sortColumn == 'seq'">a.seq</if>
+       		<if test="sortColumn == 'lat'">a.lat</if>
+       		<if test="sortColumn == 'lon'">a.lon</if>
+       	</if>
+		<if test="sortColumn  == null or sortColumn == ''">
+       		a.seq
+		</if>   
+		<if test="sortOrder == 'ASC'"> ASC</if>
+		<if test="sortOrder == 'DESC'"> DESC</if>
+		<if test="sortOrder == null or sortOrder == ''"> DESC</if>
+	</sql>
+	
+   	<sql id="pagingWhereQuery">
+		OFFSET #{startRow} ROWS
+		FETCH NEXT #{pageSize} ROWS ONLY
+	</sql>
+    
+    
+	<select id="list" 
+		parameterType="hashmap" 
+		resultMap="scooterResultMap">
+		
+		SELECT  
+			a.seq 
+			, a.lat
+			, a.lon
+		FROM tbScooter a
+		<include refid="listWhere" />
+        <include refid="listOrder" />
+        <include refid="pagingWhereQuery" />
+	</select>
+	
+	<select id="countList" 	parameterType="hashmap" resultType="int">
+        SELECT COUNT(1) FROM tbScooter a        
+		<include refid="listWhere" />
+    </select> 
+	
+	<select id="select"	
+		parameterType="net.guhya.boot.plot.module.scooter.data.ScooterData" 
+		resultMap="scooterResultMap">
+		
+    	SELECT
+			a.seq 
+			, a.lat 
+			, a.lon
+		FROM tbScooter a
+		WHERE a.seq = #{seq}
+    </select>
+    
+	 <insert id="insert" parameterType="net.guhya.boot.plot.module.scooter.data.ScooterData" 
+	 	useGeneratedKeys="true" keyProperty="seq">
+	 	
+    	INSERT INTO tbScooter(
+			lat
+			, lon
+    	)
+    	VALUES(
+    		#{lat}
+    		, #{lon}
+    	)
+    </insert>
+    
+     <update id="update" 
+     	parameterType="net.guhya.boot.plot.module.scooter.data.ScooterData">
+     	
+    	UPDATE tbScooter SET
+    		lat 				= #{lat} 
+    		, lon 				= #{lon} 
+    	WHERE seq = #{seq} 
+    </update>
+    
+    <update id="delete" 
+    	parameterType="net.guhya.boot.plot.module.scooter.data.ScooterData">
+    	    	
+		DELETE FROM tbScooter WHERE seq = #{seq} 
+   	</update>   	
+   		    
+</mapper>
