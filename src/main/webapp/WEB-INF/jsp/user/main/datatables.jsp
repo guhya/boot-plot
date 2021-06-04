@@ -71,7 +71,6 @@
 
 <script>
 
-	var scooterMarkers = new OpenLayers.Layer.Markers( "ScooterMarkers" );
 	var getScooters = function(radius, lat, lon, pageSize) {
 		$.ajax({
 	        dataType : "JSON",
@@ -86,37 +85,55 @@
 	        	lon : lon
 	        },
 	        success : function(res){
-	        	scooterMarkers.clearMarkers();
-	        	map.addLayer(scooterMarkers);
+	        	scooterLayer.getSource().clear();
 		        for (i in res.data) {
 		        	//console.log(res.data[i]);
 		        	var seq = res.data[i].seq;
 		        	var lat = res.data[i].lat;
 		        	var lon = res.data[i].lon;
-		        	var lonLat = new OpenLayers.LonLat(lon, lat).transform(
-			  	        new OpenLayers.Projection("EPSG:4326"),
-			  	        map.getProjectionObject());
-		        	scooterMarkers.addMarker(new OpenLayers.Marker(lonLat));		        	
+		        	var scooter = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([lon, lat])));
+		        	scooterLayer.getSource().addFeature(scooter);
+		        	scooterLayer.set("name", "scooterLayer");
 			    }
 	        }
 		});
 	};
 
+	var debug;
+				
 	/* Mapping */
-	var map = new OpenLayers.Map("mapdiv");
-	map.addLayer(new OpenLayers.Layer.OSM());
-	var lonLat = new OpenLayers.LonLat(103.8, 1.3)
-	      .transform(
-	        new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-	        map.getProjectionObject() // to Spherical Mercator Projection
-	      );
-	var zoom = 12;
-	var markers = new OpenLayers.Layer.Markers( "Markers" );
-	map.addLayer(markers);
-	markers.addMarker(new OpenLayers.Marker(lonLat));
-	map.setCenter(lonLat, zoom);
-	
-	getScooters(1, 103.8, 1.3);
+	var map = new ol.Map({
+		target: "mapdiv",
+		layers: [
+		    new ol.layer.Tile({
+				source: new ol.source.OSM()
+		    })
+		],
+		view: new ol.View({
+			center: ol.proj.fromLonLat([103.7525, 1.3817]),
+			zoom: 11
+		})
+	});
+	var scooterLayer = new ol.layer.Vector({
+		source: new ol.source.Vector(),
+		style: new ol.style.Style({
+			image: new ol.style.Icon({
+				scale : 0.15,
+				anchor: [0.5, 1],
+				src: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Map_marker_font_awesome.svg/200px-Map_marker_font_awesome.svg.png"
+			})
+		})
+	});
+	map.addLayer(scooterLayer);
+	map.on("moveend", function(evt) {
+		var p = map.getView().getCenter();
+		var lon = p[0]-11549571.716029117;
+		var lat = p[1]-153823.66877958635;
+
+		console.log(lon, lat);
+	});
+		
+ 	getScooters(1, 103.8, 1.3);
 	/* Mapping Ends */
 	
 	var resetForm = function(){
