@@ -104,7 +104,7 @@
 		
 	var getScooters = function(radius, lat, lon, pageSize) {
     	circleLayer.getSource().clear();
-      	var cirle = new ol.Feature(new ol.geom.Circle(ol.proj.fromLonLat([lon, lat]), 500));
+      	var cirle = new ol.Feature(new ol.geom.Circle(ol.proj.fromLonLat([lon, lat]), radius));
       	circleLayer.getSource().addFeature(cirle);
       	
 		$.ajax({
@@ -132,7 +132,10 @@
 
 		console.log("Lat : ["+lat+"], Lon : ["+lon+"]");
        	map.getView().setCenter(ol.proj.fromLonLat([lon, lat]));
-       	map.getView().setZoom(12);
+       	if(radius == 1)
+       		map.getView().setZoom(12);
+       	else
+       		map.getView().setZoom(14);
 
 		document.getElementById("sRadius").value = radius;
 		document.getElementById("sLat").value = lat;
