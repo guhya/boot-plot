@@ -8,13 +8,32 @@
 <div class="row">
 	<div class="col">
 		<div id="mapdiv" style="width:100%; height:500px;"></div>
+		<hr>
 	</div>
 </div>
-<br><br>
 <div class="row">
 	<div class="col mb-4">
-		<button type="button" onclick="doAdd()" class="btn btn-primary">Write</button>
-		<hr>
+		<div class="form-row">
+			<div class="col-md-2 mb-3">
+				<input type="text" placeholder="Radius (in meter)" class="form-control" name="sRadius" id="sRadius" value="" required>
+			</div>
+			<div class="col-md-4 mb-3">
+				<input type="text" placeholder="Latitude (1.3 ~ 1.4)" class="form-control" name="sLat" id="sLat" value="" required>
+			</div>
+			<div class="col-md-4 mb-3">
+				<input type="text" placeholder="Longitude (103.8 ~ 104)" class="form-control" name="sLon" id="sLon" value="" required>
+			</div>
+			<div class="col-md-2 mb-3">
+				<button type="button" onclick="locateScooters()" class="form-control btn btn-success">Locate Scooter</button>
+			</div>
+		</div>
+		<br>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col mb-4">
+		<button type="button" onclick="doAdd()" class="btn btn-primary">Add New Scooter</button>
 	</div>
 </div>
 
@@ -70,16 +89,31 @@
 </div>
 
 <script>
+	var locateScooters = function() {
+		var radius = document.getElementById("sRadius").value.trim();
+		var lat = document.getElementById("sLat").value.trim();
+		var lon = document.getElementById("sLon").value.trim();
 
+		if (radius == "" || lat == "" || lon == "") {
+			alert("All field must be filled");
+			return;
+		}
+		
+		getScooters(radius, lat, lon);
+	};
+		
 	var getScooters = function(radius, lat, lon, pageSize) {
+    	circleLayer.getSource().clear();
+      	var cirle = new ol.Feature(new ol.geom.Circle(ol.proj.fromLonLat([lon, lat]), 500));
+      	circleLayer.getSource().addFeature(cirle);
+      	
 		$.ajax({
 	        dataType : "JSON",
 	        method : "GET",
 	        contentType : "application/json",
-	        url : "/v1/scooters/list",
+	        url : "/v1/scooters/searchRadius",
 	        data : {
 				pageSize : pageSize == undefined ? 1000000 : pageSize,
-				page : 1,
 	        	radius : radius,
 	        	lat : lat,
 	        	lon : lon
@@ -87,21 +121,31 @@
 	        success : function(res){
 	        	scooterLayer.getSource().clear();
 		        for (i in res.data) {
-		        	//console.log(res.data[i]);
 		        	var seq = res.data[i].seq;
-		        	var lat = res.data[i].lat;
-		        	var lon = res.data[i].lon;
-		        	var scooter = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([lon, lat])));
+		        	var sLat = res.data[i].lat;
+		        	var sLon = res.data[i].lon;
+		        	var scooter = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([sLon, sLat])));
 		        	scooterLayer.getSource().addFeature(scooter);
-		        	scooterLayer.set("name", "scooterLayer");
 			    }
 	        }
 		});
+
+		console.log("Lat : ["+lat+"], Lon : ["+lon+"]");
+       	map.getView().setCenter(ol.proj.fromLonLat([lon, lat]));
+       	map.getView().setZoom(12);
+
+		document.getElementById("sRadius").value = radius;
+		document.getElementById("sLat").value = lat;
+		document.getElementById("sLon").value = lon;
+
+		document.getElementById("mapdiv").scrollIntoView();
+       	
 	};
 
 	var debug;
 				
 	/* Mapping */
+
 	var map = new ol.Map({
 		target: "mapdiv",
 		layers: [
@@ -111,9 +155,44 @@
 		],
 		view: new ol.View({
 			center: ol.proj.fromLonLat([103.7525, 1.3817]),
-			zoom: 11
+			zoom: 12
 		})
 	});
+
+	var circleLayer = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+		style: new ol.style.Style({
+			renderer : function renderer(coordinates, state) {
+				var coordinates_0 = coordinates[0];
+				var x = coordinates_0[0];
+				var y = coordinates_0[1];
+				var coordinates_1 = coordinates[1];
+				var x1 = coordinates_1[0];
+				var y1 = coordinates_1[1];
+				var ctx = state.context;
+				var dx = x1 - x;
+				var dy = y1 - y;
+				var radius = Math.sqrt(dx * dx + dy * dy);
+
+				var innerRadius = 0;
+				var outerRadius = radius * 1.4;
+
+				var gradient = ctx.createRadialGradient(x, y, innerRadius, x, y, outerRadius);
+				gradient.addColorStop(0, "rgba(137, 196, 244, 0.0)");
+				gradient.addColorStop(0.6, "rgba(137, 196, 244, 0.2)");
+				gradient.addColorStop(1, "rgba(137, 196, 244, 0.8)");
+				ctx.beginPath();
+				ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
+				ctx.fillStyle = gradient;
+				ctx.fill();
+
+				ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
+				ctx.strokeStyle = "rgba(30, 139, 195, 1)";
+				ctx.stroke();
+			}
+		})
+	}); 		    
+
 	var scooterLayer = new ol.layer.Vector({
 		source: new ol.source.Vector(),
 		style: new ol.style.Style({
@@ -124,16 +203,18 @@
 			})
 		})
 	});
+	
+	map.addLayer(circleLayer);
 	map.addLayer(scooterLayer);
 	map.on("moveend", function(evt) {
 		var p = map.getView().getCenter();
-		var lon = p[0]-11549571.716029117;
-		var lat = p[1]-153823.66877958635;
+		var lon = p[0];
+		var lat = p[1];
 
-		console.log(lon, lat);
+		console.log(p);
 	});
 		
- 	getScooters(1, 103.8, 1.3);
+ 	getScooters(1, 1.3817, 103.7525);
 	/* Mapping Ends */
 	
 	var resetForm = function(){
@@ -256,6 +337,8 @@
 					pd += "</div></div></div>";
 
 				var el  = "";
+					el += "<a onclick='getScooters(500, "+row.lat+","+row.lon+")' class='btn btn-success'>Show</a>";
+				    el += "&nbsp;";
 					el += "<a onclick='doEdit("+row.seq+")' class='btn btn-secondary'>Edit</a>";
 				    el += "&nbsp;";
 				    el += "<a tabindex='0' title='Delete' data-toggle='popover' data-placement='left' data-content='"+pd+"' class='btn btn-danger'>Delete</a>";

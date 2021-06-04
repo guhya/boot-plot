@@ -108,6 +108,21 @@
     	parameterType="net.guhya.boot.plot.module.scooter.data.ScooterData">
     	    	
 		DELETE FROM tbScooter WHERE seq = #{seq} 
-   	</update>   	
+   	</update>  
+   	
+	<select id="searchRadius" 
+		parameterType="hashmap" 
+		resultMap="scooterResultMap">
+		
+		SELECT  
+			seq 
+			, lat
+			, lon
+		FROM tbScooter 
+		WHERE 
+			lat BETWEEN 1.0 AND 1.4
+			AND lon BETWEEN 101.0 AND 104.0
+	</select>
+   	 	
    		    
 </mapper>

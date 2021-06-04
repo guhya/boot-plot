@@ -1,4 +1,3 @@
-insert into tbScooter(lat, lon) values(1.3,103.8);
 insert into tbScooter(lat, lon) values(1.3778,103.7442);
 insert into tbScooter(lat, lon) values(1.3833,103.75);
 insert into tbScooter(lat, lon) values(1.3817,103.7525);

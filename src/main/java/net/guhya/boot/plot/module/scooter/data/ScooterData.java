@@ -19,7 +19,7 @@ public class ScooterData extends AbstractData {
 	@DecimalMax(value ="2.0", message = "Max latitude is 2.0")
 	private double lat;
 	
-	@DecimalMin(value ="103.0", message = "Min longitude is 103.0")
+	@DecimalMin(value ="101.0", message = "Min longitude is 101.0")
 	@DecimalMax(value ="104.0", message = "Max longitude is 104.0")
 	private double lon;
 	

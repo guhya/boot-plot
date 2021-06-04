@@ -7,8 +7,8 @@
 
 <header>
 	<!-- Jumbotron -->
-	<div class="p-5 text-center">
-		<h1 class="mb-3">Plotting</h1>
+	<div class="p-2 text-center">
+		<h2 class="mb-1">Plotting</h2>
 	</div>
 	<!-- Jumbotron -->
 </header>

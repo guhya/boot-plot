@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import net.guhya.boot.plot.common.service.GenericService;
 import net.guhya.boot.plot.common.web.AbstractRestController;
 import net.guhya.boot.plot.common.web.request.Box;
 import net.guhya.boot.plot.common.web.response.JsonListResult;
 import net.guhya.boot.plot.common.web.response.JsonResult;
 import net.guhya.boot.plot.module.scooter.data.ScooterData;
+import net.guhya.boot.plot.module.scooter.service.ScooterService;
 
 @RestController
 @RequestMapping(value = "/v1/scooters", 
@@ -29,9 +29,9 @@ public class ScooterRestController extends AbstractRestController {
 
 	private static Logger log = LoggerFactory.getLogger(ScooterRestController.class);
 	
-	private GenericService<ScooterData> scooterService;
+	private ScooterService scooterService;
 	
-	public ScooterRestController(@Qualifier("genericService") GenericService<ScooterData> scooterService) {
+	public ScooterRestController(@Qualifier("scooterService") ScooterService scooterService) {
 		this.scooterService = scooterService;
 		this.scooterService.setEntityName("scooter");
 		
@@ -71,5 +71,14 @@ public class ScooterRestController extends AbstractRestController {
 		scooterService.delete(dto);
 		return new JsonResult<ScooterData>(dto);
 	}
+	
+	@RequestMapping(value = "/searchRadius", method = RequestMethod.GET)
+	public JsonListResult<ScooterData> searchRadius(Box paramBox) {
+		int count = scooterService.countList(paramBox.getMap());
+		listPaging(paramBox, count);
+		List<ScooterData> list = scooterService.searchRadius(paramBox.getMap());
+		return new JsonListResult<ScooterData>(getPagingData(paramBox), list);
+	}
+	
 	
 }
