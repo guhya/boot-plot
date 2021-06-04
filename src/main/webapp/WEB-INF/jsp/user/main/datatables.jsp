@@ -71,6 +71,37 @@
 
 <script>
 
+	var scooterMarkers = new OpenLayers.Layer.Markers( "ScooterMarkers" );
+	var getScooters = function(radius, lat, lon, pageSize) {
+		$.ajax({
+	        dataType : "JSON",
+	        method : "GET",
+	        contentType : "application/json",
+	        url : "/v1/scooters/list",
+	        data : {
+				pageSize : pageSize == undefined ? 1000000 : pageSize,
+				page : 1,
+	        	radius : radius,
+	        	lat : lat,
+	        	lon : lon
+	        },
+	        success : function(res){
+	        	scooterMarkers.clearMarkers();
+	        	map.addLayer(scooterMarkers);
+		        for (i in res.data) {
+		        	//console.log(res.data[i]);
+		        	var seq = res.data[i].seq;
+		        	var lat = res.data[i].lat;
+		        	var lon = res.data[i].lon;
+		        	var lonLat = new OpenLayers.LonLat(lon, lat).transform(
+			  	        new OpenLayers.Projection("EPSG:4326"),
+			  	        map.getProjectionObject());
+		        	scooterMarkers.addMarker(new OpenLayers.Marker(lonLat));		        	
+			    }
+	        }
+		});
+	};
+
 	/* Mapping */
 	var map = new OpenLayers.Map("mapdiv");
 	map.addLayer(new OpenLayers.Layer.OSM());
@@ -84,8 +115,9 @@
 	map.addLayer(markers);
 	markers.addMarker(new OpenLayers.Marker(lonLat));
 	map.setCenter(lonLat, zoom);
+	
+	getScooters(1, 103.8, 1.3);
 	/* Mapping Ends */
-
 	
 	var resetForm = function(){
 		document.inputForm.reset();
