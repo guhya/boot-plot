@@ -23,7 +23,7 @@
 	<script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
 	<script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
 	<script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap4.min.js"></script>
-	<script src="https://cdn.ckeditor.com/4.16.0/basic/ckeditor.js"></script>	
+  	<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
 <body>
 
 	<div class="container-fluid">

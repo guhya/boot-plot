@@ -6,11 +6,18 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <div class="row">
+	<div class="col">
+		<div id="mapdiv" style="width:100%; height:500px;"></div>
+	</div>
+</div>
+<br><br>
+<div class="row">
 	<div class="col mb-4">
 		<button type="button" onclick="doAdd()" class="btn btn-primary">Write</button>
 		<hr>
 	</div>
 </div>
+
 <div class="row">
 	<div class="col">
 		<table id="myTable" class="table table-striped table-bordered" style="width:100%">
@@ -63,6 +70,23 @@
 </div>
 
 <script>
+
+	/* Mapping */
+	var map = new OpenLayers.Map("mapdiv");
+	map.addLayer(new OpenLayers.Layer.OSM());
+	var lonLat = new OpenLayers.LonLat(103.8, 1.3)
+	      .transform(
+	        new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+	        map.getProjectionObject() // to Spherical Mercator Projection
+	      );
+	var zoom = 12;
+	var markers = new OpenLayers.Layer.Markers( "Markers" );
+	map.addLayer(markers);
+	markers.addMarker(new OpenLayers.Marker(lonLat));
+	map.setCenter(lonLat, zoom);
+	/* Mapping Ends */
+
+	
 	var resetForm = function(){
 		document.inputForm.reset();
 		$("#inputForm .invalid-feedback").remove();
@@ -195,7 +219,7 @@
 	
 	$(document).ready(function(){
 		dt = $("#myTable").DataTable({
-			dom : 	"<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+			dom : 	"<'row'<'col-sm-12 col-md-6'l>>" +
 					"<'row'<'col-sm-12'tr>>" +
 					"<'row'<'col-sm-12 col-md-6'i><'mt-2 col-sm-12 col-md-6'p>>",
 			pageLength 	: 10,

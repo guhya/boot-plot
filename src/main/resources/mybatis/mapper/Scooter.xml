@@ -12,23 +12,20 @@
 
 	<sql id="listWhere">	
        	WHERE 1=1
-       	<if test="condition != null and keyword != null">
+       	<if test="condition != null and keyword != null and keyword != ''">
        		<if test="condition == 'seq'">
-       			AND a.seq LIKE '%' || #{seq} || '%'
+       			AND a.seq = #{keyword}
        		</if>
        		<if test="condition == 'lat'">
-       			AND a.lat LIKE '%' || #{lat} || '%'
+       			AND a.lat = #{keyword}
        		</if>        		
        		<if test="condition == 'lon'">
-       			AND a.lon LIKE '%' || #{lon} || '%'
+       			AND a.lon = #{keyword}
        		</if>        		
        		<if test="condition == 'all'">
-       			AND a.lat LIKE '%1'
-       			<!-- 
        			AND (
-      					a.seq LIKE '%' || #{seq} || '%'
+	       			a.seq = #{keyword}
       				)
-      				-->
        		</if>        		
        	</if>
 	</sql>
