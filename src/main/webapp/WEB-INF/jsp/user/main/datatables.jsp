@@ -24,7 +24,7 @@
 				<input type="text" placeholder="Longitude (103.8 ~ 104)" class="form-control" name="sLon" id="sLon" value="" required>
 			</div>
 			<div class="col-md-2 mb-3">
-				<button type="button" onclick="locateScooters()" class="form-control btn btn-success">Locate Scooter</button>
+				<button type="button" onclick="locateScooters();" class="form-control btn btn-success">Locate Scooter</button>
 			</div>
 		</div>
 		<br>
@@ -69,11 +69,11 @@
 				<form id="inputForm" name="inputForm">
 					<div class="form-row">
 						<input type="text" style="display:none;" name="seq" id="seq" value="">
-						<div class="col-md-8 mb-3">
+						<div class="col-md-6 mb-3">
 							<label>Latitude</label> 
 							<input type="text" class="form-control" name="lat" id="lat" value="" required>
 						</div>
-						<div class="col-md-4 mb-3">
+						<div class="col-md-6 mb-3">
 							<label>Longitude</label> 
 							<input type="text" class="form-control" name="lon" id="lon" value="" required>
 						</div>
@@ -99,7 +99,7 @@
 			return;
 		}
 		
-		getScooters(radius, lat, lon);
+		getScooters(parseInt(radius), parseFloat(lat), parseFloat(lon));
 	};
 		
 	var getScooters = function(radius, lat, lon, pageSize) {
@@ -130,17 +130,17 @@
 	        }
 		});
 
-		console.log("Lat : ["+lat+"], Lon : ["+lon+"]");
+		console.log("Radius : ["+radius+"] Lat : ["+lat+"], Lon : ["+lon+"]");
        	map.getView().setCenter(ol.proj.fromLonLat([lon, lat]));
        	if(radius == 1)
        		map.getView().setZoom(12);
        	else
        		map.getView().setZoom(14);
-
+       	
 		document.getElementById("sRadius").value = radius;
 		document.getElementById("sLat").value = lat;
 		document.getElementById("sLon").value = lon;
-
+		
 		document.getElementById("mapdiv").scrollIntoView();
        	
 	};
@@ -340,7 +340,7 @@
 					pd += "</div></div></div>";
 
 				var el  = "";
-					el += "<a onclick='getScooters(500, "+row.lat+","+row.lon+")' class='btn btn-success'>Show</a>";
+					el += "<a onclick='getScooters(100, "+row.lat+","+row.lon+")' class='btn btn-success'>Show</a>";
 				    el += "&nbsp;";
 					el += "<a onclick='doEdit("+row.seq+")' class='btn btn-secondary'>Edit</a>";
 				    el += "&nbsp;";
