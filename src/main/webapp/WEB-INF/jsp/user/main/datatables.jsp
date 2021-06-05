@@ -103,10 +103,12 @@
 	};
 		
 	var getScooters = function(radius, lat, lon, pageSize) {
-    	circleLayer.getSource().clear();
-      	var cirle = new ol.Feature(new ol.geom.Circle(ol.proj.fromLonLat([lon, lat]), radius));
-      	circleLayer.getSource().addFeature(cirle);
-      	
+		if (radius != 100000)  {
+	    	circleLayer.getSource().clear();
+	      	var cirle = new ol.Feature(new ol.geom.Circle(ol.proj.fromLonLat([lon, lat]), radius));
+	      	circleLayer.getSource().addFeature(cirle);
+		}      	
+		
 		$.ajax({
 	        dataType : "JSON",
 	        method : "GET",
@@ -132,7 +134,7 @@
 
 		console.log("Radius : ["+radius+"] Lat : ["+lat+"], Lon : ["+lon+"]");
        	map.getView().setCenter(ol.proj.fromLonLat([lon, lat]));
-       	if(radius == 1)
+       	if(radius == 100000)
        		map.getView().setZoom(12);
        	else
        		map.getView().setZoom(14);
@@ -217,7 +219,7 @@
 		console.log(p);
 	});
 		
- 	getScooters(1, 1.3817, 103.7525);
+ 	getScooters(100000, 1.3817, 103.7525);
 	/* Mapping Ends */
 	
 	var resetForm = function(){

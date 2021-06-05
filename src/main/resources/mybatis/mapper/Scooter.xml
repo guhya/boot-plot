@@ -120,8 +120,8 @@
 			, lon
 		FROM tbScooter 
 		WHERE 
-			lat BETWEEN 1.0 AND 2.0
-			AND lon BETWEEN 101.0 AND 104.0
+			lat BETWEEN #{minLat} AND #{maxLat}
+			AND lon BETWEEN #{minLon} AND #{maxLon}
 	</select>
    	 	
    		    
