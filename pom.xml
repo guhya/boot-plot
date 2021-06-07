@@ -11,7 +11,7 @@
 	
 	<groupId>net.guhya.boot</groupId>
 	<artifactId>plot</artifactId>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>plot</name>
 	<description>Plotting app</description>
@@ -143,9 +143,6 @@
 		   <groupId>com.fasterxml.jackson.datatype</groupId>
 		   <artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
-		
-		
-		
 		
 	</dependencies>
 
