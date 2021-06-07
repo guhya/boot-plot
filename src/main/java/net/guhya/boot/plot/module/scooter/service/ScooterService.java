@@ -15,6 +15,7 @@
  */
 package net.guhya.boot.plot.module.scooter.service;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -31,9 +32,9 @@ import net.guhya.boot.plot.module.scooter.data.ScooterData;
 public class ScooterService extends GenericService<ScooterData> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ScooterService.class);
-	
+
 	private ScooterDao scooterDao;
-	
+
 	public ScooterService(@Qualifier("scooterDao") ScooterDao scooterDao) {
 		super(scooterDao);
 		this.scooterDao = scooterDao;
@@ -41,42 +42,99 @@ public class ScooterService extends GenericService<ScooterData> {
 	}
 
 	public List<ScooterData> searchRadius(Map<String, Object> parameterMap) {
-		
+
+		/* Narrow down the search with bound so we won't calculate all distances */
 		calculateBound(parameterMap);
+
+		List<ScooterData> scooters = scooterDao.searchRadius(parameterMap);
+
+		/* 
+		After we got all scooters data within a distance, we calculate the
+        exact scooter distance with the center point and remove scooters
+		outside radius  
+		*/
+		calculateDistance(scooters, parameterMap);
+
+		return scooters;
+	}
+
+	private void calculateDistance(List<ScooterData> scooters, Map<String, Object> parameterMap) {
+		double lat = Double.valueOf((String) parameterMap.get("lat"));
+		double lon = Double.valueOf((String) parameterMap.get("lon"));
+		double radius = Double.valueOf((String) parameterMap.get("radius"));
 		
-		return scooterDao.searchRadius(parameterMap);
+		Iterator<ScooterData> it = scooters.iterator();
+		while(it.hasNext()) {
+			ScooterData sc = it.next();
+			double distance = distance(lat, lon, sc.getLat(), sc.getLon());
+				logger.info("Lat [{}], Lon [{}], Sc Lat [{}], Sc Lon [{}], Dist [{}]", 
+					lat, lon, sc.getLat(), sc.getLon(), distance);
+					
+			if (distance > radius) {
+				it.remove();
+			} else {
+				sc.setDistance(distance);
+	
+				sc.setMaxLat((Double) parameterMap.get("maxLat"));
+				sc.setMinLat((Double) parameterMap.get("minLat"));
+				sc.setMaxLon((Double) parameterMap.get("maxLon"));
+				sc.setMinLon((Double) parameterMap.get("minLon"));
+			}
+		}
 	}
 	
 	private void calculateBound(Map<String, Object> parameterMap) {
 		double maxLat = 0, minLat = 0, maxLon = 0, minLon = 0;
+
+		double lat = Double.valueOf((String) parameterMap.get("lat"));
+		double lon = Double.valueOf((String) parameterMap.get("lon"));
+		double radius = Double.valueOf((String) parameterMap.get("radius"));
+
+		/*
+        number of km per degree = ~111km (111.32 in google maps, but range varies
+		between 110.567km at the equator and 111.699km at the poles)
+		1 km in degree = 1 / 111.32km = 0.0089
+		1 m in degree = 0.0089 / 1000 = 0.0000089
+		*/
+		double coef = radius * 0.0000089;
 		
-		 double lat = Double.valueOf((String) parameterMap.get("lat"));
-		 double lon = Double.valueOf((String) parameterMap.get("lon"));
-		 double radius = Double.valueOf((String) parameterMap.get("radius"));
-		 double half = radius / 2;
-		 
-		 /**
-		  * - 111,111 meter is 1 degree latitude
-		  * - 111,111 meter * Math.cos(latitude) is 1 degree longitude
-		  */
-		 
-		final double d = 111111;
-		double latMeter = half / d;
-		double lonMeter = half / d * Math.cos(lat);
+		maxLat = lat + coef;
+		minLat = lat - coef;
 		
-		maxLat = lat + latMeter;
-		minLat = lat - latMeter;
-		maxLon = lon + lonMeter;
-		minLon = lon - lonMeter;
-		
+		/* pi / 180 = 0.018 */
+		maxLon = lon + coef / Math.cos(lat * 0.018);
+		minLon = lon - coef / Math.cos(lat * 0.018);
+
 		logger.info("Lat [{}], Lon[{}]", lat, lon);
-		logger.info("Max Lat [{}], Min Lat [{}], Max Lon [{}], Min Lon[{}]", 
-				maxLat, minLat, maxLon, minLon);
-		
+		logger.info("Max Lat [{}], Min Lat [{}], Max Lon [{}], Min Lon [{}]", 
+			maxLat, minLat, maxLon, minLon);
+
 		parameterMap.put("maxLat", maxLat);
 		parameterMap.put("minLat", minLat);
 		parameterMap.put("maxLon", maxLon);
 		parameterMap.put("minLon", minLon);
 	}
 
+	private double distance(double lat1, double lon1, double lat2, double lon2) {
+		double theta = lon1 - lon2;
+		double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2))
+				+ Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) 
+				* Math.cos(deg2rad(theta));
+				
+		dist = Math.acos(dist);
+		dist = rad2deg(dist);
+		dist = dist * 60 * 1.1515;
+		dist = dist * 1.609344 * 1000;
+		
+		return dist;
+	}
+
+	
+	private double deg2rad(double deg) {
+		return (deg * Math.PI / 180.0);
+	}
+
+	private double rad2deg(double rad) {
+		return (rad * 180.0 / Math.PI);
+	}
 }

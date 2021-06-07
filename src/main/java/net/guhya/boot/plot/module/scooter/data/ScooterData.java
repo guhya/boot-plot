@@ -23,6 +23,11 @@ public class ScooterData extends AbstractData {
 	@DecimalMax(value ="104.0", message = "Max longitude is 104.0")
 	private double lon;
 	
+	private double distance;
+	private double minLat;
+	private double maxLat;
+	private double minLon;
+	private double maxLon;
 	
 	public ScooterData() {
 	}
@@ -54,9 +59,67 @@ public class ScooterData extends AbstractData {
 		this.lon = lon;
 	}
 
+	public double getDistance() {
+		return distance;
+	}
+
+	public void setDistance(double distance) {
+		this.distance = distance;
+	}
+
+	public double getMinLat() {
+		return minLat;
+	}
+
+	public void setMinLat(double minLat) {
+		this.minLat = minLat;
+	}
+
+	public double getMaxLat() {
+		return maxLat;
+	}
+
+	public void setMaxLat(double maxLat) {
+		this.maxLat = maxLat;
+	}
+
+	public double getMinLon() {
+		return minLon;
+	}
+
+	public void setMinLon(double minLon) {
+		this.minLon = minLon;
+	}
+
+	public double getMaxLon() {
+		return maxLon;
+	}
+
+	public void setMaxLon(double maxLon) {
+		this.maxLon = maxLon;
+	}
+
 	@Override
 	public String toString() {
-		return "ScooterData [seq=" + seq + ", lat=" + lat + ", lon=" + lon + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("ScooterData [seq=");
+		builder.append(seq);
+		builder.append(", lat=");
+		builder.append(lat);
+		builder.append(", lon=");
+		builder.append(lon);
+		builder.append(", distance=");
+		builder.append(distance);
+		builder.append(", minLat=");
+		builder.append(minLat);
+		builder.append(", maxLat=");
+		builder.append(maxLat);
+		builder.append(", minLon=");
+		builder.append(minLon);
+		builder.append(", maxLon=");
+		builder.append(maxLon);
+		builder.append("]");
+		return builder.toString();
 	}
 	
 }

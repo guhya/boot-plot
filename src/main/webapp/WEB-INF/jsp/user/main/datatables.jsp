@@ -127,6 +127,7 @@
 		        	var sLat = res.data[i].lat;
 		        	var sLon = res.data[i].lon;
 		        	var scooter = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([sLon, sLat])));
+		        	scooter.setStyle(scooterStyle(seq));
 		        	scooterLayer.getSource().addFeature(scooter);
 			    }
 	        }
@@ -198,15 +199,29 @@
 		})
 	}); 		    
 
+	var scooterStyle = function(label) {
+		console.log(scooterStyle);
+		var style = new ol.style.Style({
+				image: new ol.style.Icon({
+					scale : 0.15,
+					anchor: [0.5, 1],
+					src: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Map_marker_font_awesome.svg/200px-Map_marker_font_awesome.svg.png"
+				}),
+		      	text: new ol.style.Text({
+		        	font: '12px Calibri,sans-serif',
+		        	fill: new ol.style.Fill({ color: '#000' }),
+		        	stroke: new ol.style.Stroke({
+		            	color: '#fff', width: 2
+		        	}),
+		        	text: map.getView().getZoom() > 12 ? "Scooter ["+label+"]" : ''
+		        })
+			});
+
+		return style;
+	};
+	
 	var scooterLayer = new ol.layer.Vector({
-		source: new ol.source.Vector(),
-		style: new ol.style.Style({
-			image: new ol.style.Icon({
-				scale : 0.15,
-				anchor: [0.5, 1],
-				src: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Map_marker_font_awesome.svg/200px-Map_marker_font_awesome.svg.png"
-			})
-		})
+		source: new ol.source.Vector()
 	});
 	
 	map.addLayer(circleLayer);
